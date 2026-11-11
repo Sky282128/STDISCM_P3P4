@@ -1,0 +1,4 @@
+# .gitignore
+build/
+P3/producer/videos/
+.vscode/
