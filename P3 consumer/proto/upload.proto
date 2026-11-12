@@ -1,0 +1,34 @@
+// proto/upload.proto
+syntax = "proto3";
+
+package mediaupload;
+
+service MediaUpload {
+  rpc Upload(stream UploadRequest) returns (UploadResponse);
+}
+
+message FileInfo {
+  string filename = 1;
+  uint64 file_size = 2;
+  uint32 producer_id = 3;
+}
+
+message UploadRequest {
+  oneof payload {
+    FileInfo info = 1;
+    bytes chunk = 2;
+  }
+}
+
+enum UploadStatus {
+  UPLOAD_STATUS_UNSPECIFIED = 0;
+  UPLOAD_STATUS_ACCEPTED = 1;
+  UPLOAD_STATUS_DROPPED_QUEUE_FULL = 2;
+  UPLOAD_STATUS_DUPLICATE = 3;
+  UPLOAD_STATUS_ERROR = 4;
+}
+
+message UploadResponse {
+  UploadStatus status = 1;
+  string message = 2;
+}
