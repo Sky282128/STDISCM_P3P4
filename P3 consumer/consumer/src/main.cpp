@@ -2,14 +2,17 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include "Testwindow.h"
+#include "VideoGallery.h"
 #include <GLFW/glfw3.h>
 #include <cstdio>
 
-int main() {
+int main()
+{
     // 1. Initialize GLFW and create a window
-    if (!glfwInit()) return 1;
+    if (!glfwInit())
+        return 1;
 
-    const char* glsl_version = "#version 330";
+    const char *glsl_version = "#version 330";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -17,15 +20,16 @@ int main() {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-    GLFWwindow* window = glfwCreateWindow(1280, 720, "Dear ImGui + OpenGL", nullptr, nullptr);
-    if (!window) return 1;
+    GLFWwindow *window = glfwCreateWindow(1280, 720, "Dear ImGui + OpenGL", nullptr, nullptr);
+    if (!window)
+        return 1;
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
 
     // 2. Initialize Dear ImGui context and backends
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
+    ImGuiIO &io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Optional keyboard navigation
 
     ImGui::StyleColorsDark();
@@ -33,22 +37,48 @@ int main() {
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
-    // Application state
-    float slider_val = 0.5f;
-    int counter = 0;
+    // flag to show the test window
+    bool showTest = false;
+
+    bool showGallery = false;
 
     // 3. Main loop
-    while (!glfwWindowShouldClose(window)) {
+    while (!glfwWindowShouldClose(window))
+    {
         glfwPollEvents();
-
-        // flag to show the test window
-        bool showTest = true;
 
         // Start a new ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
+        ImGui::Begin("main window");
+        if (ImGui::Button("Show Test Window"))
+        {
+            if (showTest == !true)
+            {
+                showTest = true;
+            }
+            else
+            {
+                showTest = false;
+            }
+        }
+
+        if (ImGui::Button("Show Gallery"))
+        {
+            if (showGallery == !true)
+            {
+                showGallery = true;
+            }
+            else
+            {
+                showGallery = false;
+            }
+        }
+        ImGui::End();
+
+        gallery::RenderGallery(&showGallery);
         windows::RenderTestWindow(&showTest);
 
         // Render ImGui draw data onto the OpenGL framebuffer
