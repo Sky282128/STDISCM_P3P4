@@ -1,10 +1,14 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+
 #include "Testwindow.h"
 #include "VideoGallery.h"
+#include "MediaUploadService.h"
+
 #include <GLFW/glfw3.h>
 #include <cstdio>
+#include <thread>
 
 int main()
 {
@@ -36,6 +40,9 @@ int main()
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
+
+    // Start the grpc server
+    std::thread grpc_thread(runServer);
 
     // flag to show the test window
     bool showTest = false;
@@ -94,10 +101,15 @@ int main()
     }
 
     // 4. Cleanup
+    stopServer();
+    if (grpc_thread.joinable())
+    {
+        grpc_thread.join(); // Waits for the RunServer thread to safely exit
+    }
+
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
-
     glfwDestroyWindow(window);
     glfwTerminate();
     return 0;
