@@ -8,10 +8,56 @@
 
 #include <GLFW/glfw3.h>
 #include <cstdio>
+#include <filesystem>
+#include <functional>
+#include <iostream>
+#include <optional>
 #include <thread>
+#include <vector>
+
+namespace {
+
+namespace fs = std::filesystem;
+
+void processUploads(UploadQueue<UploadJob>& uploadQueue) {
+    std::error_code directoryError;
+    fs::create_directories("uploads", directoryError);
+    if (directoryError) {
+        std::cerr << "[Worker] Failed to create uploads directory: "
+                  << directoryError.message() << "\n";
+        return;
+    }
+
+    while (true) {
+        std::optional<UploadJob> job = uploadQueue.pop();
+        if (!job.has_value()) {
+            return;
+        }
+
+        const fs::path destination =
+            fs::path("uploads") /
+            ("producer_" + std::to_string(job->producerId) + "_" + job->filename);
+
+        std::error_code moveError;
+        fs::rename(job->temporaryPath, destination, moveError);
+        if (moveError) {
+            std::cerr << "[Worker] Failed to save " << job->filename << ": "
+                      << moveError.message() << "\n";
+        } else {
+            std::cout << "[Worker] Saved " << destination.string() << "\n";
+        }
+    }
+}
+
+}
 
 int main()
 {
+    UploadQueue<UploadJob> uploadQueue(10);
+    constexpr int consumerCount = 2;
+    std::vector<std::thread> consumerThreads;
+    consumerThreads.reserve(consumerCount);
+
     // 1. Initialize GLFW and create a window
     if (!glfwInit())
         return 1;
@@ -41,8 +87,12 @@ int main()
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
+    for (int i = 0; i < consumerCount; ++i) {
+        consumerThreads.emplace_back(processUploads, std::ref(uploadQueue));
+    }
+
     // Start the grpc server
-    std::thread grpc_thread(runServer);
+    std::thread grpc_thread(runServer, std::ref(uploadQueue));
 
     // flag to show the test window
     bool showTest = false;
@@ -102,6 +152,10 @@ int main()
 
     // 4. Cleanup
     stopServer();
+    uploadQueue.stop();
+    for (std::thread& worker : consumerThreads) {
+        worker.join();
+    }
     if (grpc_thread.joinable())
     {
         grpc_thread.join(); // Waits for the RunServer thread to safely exit

@@ -1,9 +1,13 @@
 #include "MediaUploadService.h"
 
-#include <iostream>
+#include <atomic>
+#include <filesystem>
 #include <fstream>
+#include <iostream>
 #include <string>
 #include <memory>
+#include <system_error>
+#include <utility>
 
 using grpc::Server;
 using grpc::ServerBuilder;
@@ -17,8 +21,14 @@ using mediaupload::UploadRequest;
 using mediaupload::UploadResponse;
 using mediaupload::UploadStatus;
 
+namespace fs = std::filesystem;
+
 // server to hold the class
 static std::unique_ptr<grpc::Server> server;
+static std::atomic_uint64_t next_upload_id{1};
+
+MediaUploadServiceImpl::MediaUploadServiceImpl(UploadQueue<UploadJob>& uploadQueue)
+    : uploadQueue_(uploadQueue) {}
 
 Status MediaUploadServiceImpl::Upload(ServerContext *context,
                                       ServerReader<UploadRequest> *reader,
@@ -31,6 +41,7 @@ Status MediaUploadServiceImpl::Upload(ServerContext *context,
     uint32_t producer_id = 0;
     uint64_t expected_size = 0;
     uint64_t bytes_received = 0;
+    std::string temporary_path;
 
     // Read messages from the client stream
     while (reader->Read(&request))
@@ -48,18 +59,37 @@ Status MediaUploadServiceImpl::Upload(ServerContext *context,
             producer_id = request.info().producer_id();
             expected_size = request.info().file_size();
 
+            const std::string safe_filename = fs::path(filename).filename().string();
+            if (safe_filename.empty()) {
+                response->set_status(mediaupload::UPLOAD_STATUS_ERROR);
+                response->set_message("Filename cannot be empty.");
+                return Status(StatusCode::INVALID_ARGUMENT, "Invalid filename");
+            }
+            filename = safe_filename;
+
             std::cout << "[Server] Receiving file: " << filename
                       << " from Producer ID: " << producer_id
                       << " (" << expected_size << " bytes)\n";
 
-            std::string out_path = "producer_" + std::to_string(producer_id) + "_" + filename;
+            std::error_code directory_error;
+            fs::create_directories("upload_tmp", directory_error);
+            if (directory_error) {
+                response->set_status(mediaupload::UPLOAD_STATUS_ERROR);
+                response->set_message("Failed to create temporary upload directory.");
+                return Status(StatusCode::INTERNAL, "Temporary directory error");
+            }
 
-            outfile.open(out_path, std::ios::binary);
+            temporary_path =
+                (fs::path("upload_tmp") /
+                 ("upload_" + std::to_string(next_upload_id.fetch_add(1)) + "_" + filename))
+                    .string();
+
+            outfile.open(temporary_path, std::ios::binary);
             if (!outfile.is_open())
             {
                 response->set_status(mediaupload::UPLOAD_STATUS_ERROR);
-                response->set_message("Failed to open file on server.");
-                return Status(StatusCode::INTERNAL, "File I/O Error");
+                response->set_message("Failed to open temporary upload file.");
+                return Status(StatusCode::INTERNAL, "Temporary file I/O error");
             }
 
             is_first_message = false;
@@ -91,18 +121,39 @@ Status MediaUploadServiceImpl::Upload(ServerContext *context,
         return Status(StatusCode::INVALID_ARGUMENT, "Empty stream");
     }
 
+    if (bytes_received != expected_size) {
+        std::error_code remove_error;
+        fs::remove(temporary_path, remove_error);
+        response->set_status(mediaupload::UPLOAD_STATUS_ERROR);
+        response->set_message("Received file size does not match the declared size.");
+        return Status(StatusCode::INVALID_ARGUMENT, "Incomplete upload");
+    }
+
     std::cout << "[Server] Finished receiving " << filename
-              << ". Bytes saved: " << bytes_received << "\n";
+              << ". Bytes received: " << bytes_received << "\n";
+
+    UploadJob job;
+    job.temporaryPath = temporary_path;
+    job.filename = filename;
+    job.producerId = producer_id;
+
+    if (!uploadQueue_.tryPush(std::move(job))) {
+        std::error_code remove_error;
+        fs::remove(temporary_path, remove_error);
+        response->set_status(mediaupload::UPLOAD_STATUS_DROPPED_QUEUE_FULL);
+        response->set_message("Upload queue is full.");
+        return Status::OK;
+    }
 
     response->set_status(mediaupload::UPLOAD_STATUS_ACCEPTED);
-    response->set_message("File uploaded successfully.");
+    response->set_message("Upload queued successfully.");
     return Status::OK;
 }
 
-void runServer()
+void runServer(UploadQueue<UploadJob>& uploadQueue)
 {
     std::string server_address("0.0.0.0:50051");
-    MediaUploadServiceImpl service;
+    MediaUploadServiceImpl service(uploadQueue);
 
     ServerBuilder builder;
     builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
