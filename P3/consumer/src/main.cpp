@@ -2,7 +2,6 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
-#include "Testwindow.h"
 #include "VideoGallery.h"
 #include "MediaUploadService.h"
 
@@ -136,7 +135,7 @@ int main()
         ImGui::End();
 
         gallery::RenderGallery(&showGallery);
-        windows::RenderTestWindow(&showTest);
+        
 
         // Render ImGui draw data onto the OpenGL framebuffer
         ImGui::Render();
