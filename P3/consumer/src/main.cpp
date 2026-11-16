@@ -4,6 +4,7 @@
 
 #include "VideoGallery.h"
 #include "MediaUploadService.h"
+#include "consumer_config.h"
 
 #include <GLFW/glfw3.h>
 #include <cstdio>
@@ -50,10 +51,24 @@ void processUploads(UploadQueue<UploadJob>& uploadQueue) {
 
 }
 
-int main()
+int main(int argc, char** argv)
 {
-    UploadQueue<UploadJob> uploadQueue(10);
-    constexpr int consumerCount = 2;
+    ConsumerConfig config;
+    std::string error;
+    if (!ConsumerConfig::parse(argc, argv, config, error)) {
+        if (error == "help") {
+            std::cout << ConsumerConfig::usage();
+            return 0;
+        }
+        std::cerr << error << "\n" << ConsumerConfig::usage();
+        return 2;
+    }
+
+    std::cout << "Consumers: " << config.consumerCount
+              << ", queue capacity: " << config.queueCapacity << "\n";
+
+    UploadQueue<UploadJob> uploadQueue(config.queueCapacity);
+    const int consumerCount = config.consumerCount;
     std::vector<std::thread> consumerThreads;
     consumerThreads.reserve(consumerCount);
 
