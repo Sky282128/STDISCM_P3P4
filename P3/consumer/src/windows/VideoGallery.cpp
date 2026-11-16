@@ -14,6 +14,10 @@
 #include <GLFW/glfw3.h>
 #include <opencv2/opencv.hpp>
 
+#ifndef GL_CLAMP_TO_EDGE
+#define GL_CLAMP_TO_EDGE 0x812F
+#endif
+
 namespace fs = std::filesystem;
 
 namespace
