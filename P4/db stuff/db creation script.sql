@@ -1,0 +1,34 @@
+CREATE DATABASE IF NOT EXISTS user_info;
+
+USE user_info;
+
+CREATE TABLE IF NOT EXISTS users (
+	user_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	username VARCHAR(100) NOT NULL UNIQUE,
+    role ENUM('TEACHER', 'STUDENT') NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS login_details (
+	user_id BIGINT UNSIGNED NOT NULL PRIMARY KEY,
+    password VARCHAR(255) NOT NULL,
+    
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS courses (
+	course_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    course_name VARCHAR(100) NOT NULL UNIQUE,
+    status ENUM('OPEN', 'CLOSED') NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS grades (
+	course_id BIGINT UNSIGNED NOT NULL,
+    course_name VARCHAR(100) NOT NULL,
+    user_id BIGINT UNSIGNED NOT NULL,
+    grade FLOAT NOT NULL,
+    
+    FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE,
+    FOREIGN KEY (course_name) REFERENCES courses(course_name) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    PRIMARY KEY (user_id, course_id)
+);

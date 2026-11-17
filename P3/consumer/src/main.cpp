@@ -84,12 +84,30 @@ int main(int argc, char** argv)
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-    GLFWwindow *window = glfwCreateWindow(1280, 720, "Dear ImGui + OpenGL", nullptr, nullptr);
-    if (!window)
-        return 1;
-    glfwMakeContextCurrent(window);
-    glfwSwapInterval(1); // Enable vsync
+        GLFWwindow *window = glfwCreateWindow(1280, 720, "Video Player", nullptr, nullptr);
 
+        if (!window)
+            return 1;
+
+        // This code is for maximizing the Video Player window.
+        GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+
+        if (monitor != nullptr)
+        {
+            const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+            if (mode != nullptr)
+            {
+                glfwSetWindowSize(window, mode->width, mode->height);
+                glfwSetWindowPos(window, 0, 0);
+            }
+        }
+
+        glfwMakeContextCurrent(window);
+        glfwSwapInterval(1);
+    // This code is for setting up the OpenGL window.
+    glfwMakeContextCurrent(window);
+    glfwSwapInterval(1);
     // 2. Initialize Dear ImGui context and backends
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -108,10 +126,8 @@ int main(int argc, char** argv)
     // Start the grpc server
     std::thread grpc_thread(runServer, std::ref(uploadQueue));
 
-    // flag to show the test window
-    bool showTest = false;
-
-    bool showGallery = false;
+    // This variable is for controlling the visibility of the Gallery.
+    bool showGallery = true;
 
     // 3. Main loop
     while (!glfwWindowShouldClose(window))
@@ -123,35 +139,8 @@ int main(int argc, char** argv)
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::Begin("main window");
-        if (ImGui::Button("Show Test Window"))
-        {
-            if (showTest == !true)
-            {
-                showTest = true;
-            }
-            else
-            {
-                showTest = false;
-            }
-        }
-
-        if (ImGui::Button("Show Gallery"))
-        {
-            if (showGallery == !true)
-            {
-                showGallery = true;
-            }
-            else
-            {
-                showGallery = false;
-            }
-        }
-        ImGui::End();
-
+        // This code is for displaying the Gallery directly.
         gallery::RenderGallery(&showGallery);
-        
-
         // Render ImGui draw data onto the OpenGL framebuffer
         ImGui::Render();
         int display_w, display_h;

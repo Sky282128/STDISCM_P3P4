@@ -334,37 +334,38 @@ namespace
     // This function is for displaying a video frame in the GUI.
 
     // This function displays a video frame in the GUI while preserving its aspect ratio.
-    void DisplayVideoFrame(
-        const cv::Mat& frame,
-        GLuint texture
-    )
-    {
-        if (frame.empty() || texture == 0)
-            return;
+// This function is for displaying a resized video frame
+// while maintaining its original aspect ratio.
+void DisplayVideoFrame(
+    const cv::Mat& frame,
+    GLuint texture
+)
+{
+    if (frame.empty() || texture == 0)
+        return;
 
-        float width =
-            static_cast<float>(frame.cols);
+    float width =
+        static_cast<float>(frame.cols);
 
-        float height =
-            static_cast<float>(frame.rows);
+    float height =
+        static_cast<float>(frame.rows);
 
-        float scale = std::min(
-            640.0f / width,
-            360.0f / height
-        );
+    // This code is for increasing the video display size.
+    float scale = std::min(
+        2000.0f / width,
+        540.0f / height
+    );
 
-        scale = std::min(scale, 1.0f);
-
-        ImGui::Image(
-            static_cast<ImTextureID>(texture),
-            ImVec2(
-                width * scale,
-                height * scale
-            ),
-            ImVec2(0, 0),
-            ImVec2(1, 1)
-        );
-    }
+    ImGui::Image(
+        static_cast<ImTextureID>(texture),
+        ImVec2(
+            width * scale,
+            height * scale
+        ),
+        ImVec2(0, 0),
+        ImVec2(1, 1)
+    );
+}
 }
 
 
