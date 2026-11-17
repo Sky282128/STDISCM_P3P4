@@ -1,4 +1,6 @@
 #include "MediaUploadService.h"
+#include "DuplicateRegistry.h"
+#include "Sha256.h"
 
 #include <atomic>
 #include <filesystem>
@@ -26,6 +28,7 @@ namespace fs = std::filesystem;
 // server to hold the class
 static std::unique_ptr<grpc::Server> server;
 static std::atomic_uint64_t next_upload_id{1};
+static DuplicateRegistry duplicate_registry;
 
 MediaUploadServiceImpl::MediaUploadServiceImpl(UploadQueue<UploadJob>& uploadQueue)
     : uploadQueue_(uploadQueue) {}
@@ -42,6 +45,7 @@ Status MediaUploadServiceImpl::Upload(ServerContext *context,
     uint64_t expected_size = 0;
     uint64_t bytes_received = 0;
     std::string temporary_path;
+    Sha256 hasher;
 
     // Read messages from the client stream
     while (reader->Read(&request))
@@ -105,6 +109,7 @@ Status MediaUploadServiceImpl::Upload(ServerContext *context,
 
             const std::string &chunk_data = request.chunk();
             outfile.write(chunk_data.data(), chunk_data.size());
+            hasher.update(chunk_data.data(), chunk_data.size());
             bytes_received += chunk_data.size();
         }
     }
@@ -132,12 +137,23 @@ Status MediaUploadServiceImpl::Upload(ServerContext *context,
     std::cout << "[Server] Finished receiving " << filename
               << ". Bytes received: " << bytes_received << "\n";
 
+    const std::string digest = hasher.finalHex();
+    if (!duplicate_registry.tryReserve(digest)) {
+        std::error_code remove_error;
+        fs::remove(temporary_path, remove_error);
+        std::cout << "[Server] Duplicate detected, discarded " << filename << "\n";
+        response->set_status(mediaupload::UPLOAD_STATUS_DUPLICATE);
+        response->set_message("An identical video was already uploaded.");
+        return Status::OK;
+    }
+
     UploadJob job;
     job.temporaryPath = temporary_path;
     job.filename = filename;
     job.producerId = producer_id;
 
     if (!uploadQueue_.tryPush(std::move(job))) {
+        duplicate_registry.release(digest);
         std::error_code remove_error;
         fs::remove(temporary_path, remove_error);
         response->set_status(mediaupload::UPLOAD_STATUS_DROPPED_QUEUE_FULL);
