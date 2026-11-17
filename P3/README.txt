@@ -66,7 +66,7 @@ Inputs
    Keep the quotes if the path contains spaces. Start the consumer from this "run" folder.
 
 3. Start the consumer first (command window 1, inside p3test\run)
-     consumer\build\Debug\consumer.exe --consumers 2 --queue 10
+     consumer\build\Debug\consumer.exe --consumers C --queue Q
    Keep this window open. Closing the consumer window stops the server.
 
    Note: 
