@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package auth.v1;
+
+service Authenticator {
+    rpc Authenticate (AuthRequest) returns (Result);
+    rpc Register (RegisterRequest) returns (Result);
+}
+
+message AuthRequest {
+    string username = 1;
+    string password = 2;
+}
+
+message RegisterRequest {
+    string username = 1;
+    string password = 2;
+    Role role = 3;
+}
+
+message Result {
+    bool authenticated = 1;
+}
+
+enum Role {
+    UNSPECIFIED = 0;
+    Student = 1;
+    Teacher = 2;
+}

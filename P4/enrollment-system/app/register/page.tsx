@@ -7,7 +7,7 @@ export default function RegisterPage() {
                 <form
                     action = {async (FormData) => {
                         'use server';
-                        // A login function will go here eventually
+                        // A register function will go here eventually
                         redirect('/');
                     }}
                 >
