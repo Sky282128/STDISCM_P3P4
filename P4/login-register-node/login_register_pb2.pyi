@@ -8,11 +8,11 @@ DESCRIPTOR: _descriptor.FileDescriptor
 class Role(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = ()
     UNSPECIFIED: _ClassVar[Role]
-    Student: _ClassVar[Role]
-    Teacher: _ClassVar[Role]
+    STUDENT: _ClassVar[Role]
+    TEACHER: _ClassVar[Role]
 UNSPECIFIED: Role
-Student: Role
-Teacher: Role
+STUDENT: Role
+TEACHER: Role
 
 class AuthRequest(_message.Message):
     __slots__ = ("username", "password")
@@ -32,8 +32,16 @@ class RegisterRequest(_message.Message):
     role: Role
     def __init__(self, username: _Optional[str] = ..., password: _Optional[str] = ..., role: _Optional[_Union[Role, str]] = ...) -> None: ...
 
-class Result(_message.Message):
-    __slots__ = ("authenticated",)
+class AuthResult(_message.Message):
+    __slots__ = ("authenticated", "role")
     AUTHENTICATED_FIELD_NUMBER: _ClassVar[int]
+    ROLE_FIELD_NUMBER: _ClassVar[int]
     authenticated: bool
-    def __init__(self, authenticated: _Optional[bool] = ...) -> None: ...
+    role: Role
+    def __init__(self, authenticated: _Optional[bool] = ..., role: _Optional[_Union[Role, str]] = ...) -> None: ...
+
+class RegisterResult(_message.Message):
+    __slots__ = ("success",)
+    SUCCESS_FIELD_NUMBER: _ClassVar[int]
+    success: bool
+    def __init__(self, success: _Optional[bool] = ...) -> None: ...

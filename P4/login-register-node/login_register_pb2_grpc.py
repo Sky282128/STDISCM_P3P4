@@ -37,12 +37,12 @@ class AuthenticatorStub:
         self.Authenticate = channel.unary_unary(
                 '/auth.v1.Authenticator/Authenticate',
                 request_serializer=login__register__pb2.AuthRequest.SerializeToString,
-                response_deserializer=login__register__pb2.Result.FromString,
+                response_deserializer=login__register__pb2.AuthResult.FromString,
                 _registered_method=True)
         self.Register = channel.unary_unary(
                 '/auth.v1.Authenticator/Register',
                 request_serializer=login__register__pb2.RegisterRequest.SerializeToString,
-                response_deserializer=login__register__pb2.Result.FromString,
+                response_deserializer=login__register__pb2.RegisterResult.FromString,
                 _registered_method=True)
 
 
@@ -67,12 +67,12 @@ def add_AuthenticatorServicer_to_server(servicer, server):
             'Authenticate': grpc.unary_unary_rpc_method_handler(
                     servicer.Authenticate,
                     request_deserializer=login__register__pb2.AuthRequest.FromString,
-                    response_serializer=login__register__pb2.Result.SerializeToString,
+                    response_serializer=login__register__pb2.AuthResult.SerializeToString,
             ),
             'Register': grpc.unary_unary_rpc_method_handler(
                     servicer.Register,
                     request_deserializer=login__register__pb2.RegisterRequest.FromString,
-                    response_serializer=login__register__pb2.Result.SerializeToString,
+                    response_serializer=login__register__pb2.RegisterResult.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -101,7 +101,7 @@ class Authenticator:
             target,
             '/auth.v1.Authenticator/Authenticate',
             login__register__pb2.AuthRequest.SerializeToString,
-            login__register__pb2.Result.FromString,
+            login__register__pb2.AuthResult.FromString,
             options,
             channel_credentials,
             insecure,
@@ -128,7 +128,7 @@ class Authenticator:
             target,
             '/auth.v1.Authenticator/Register',
             login__register__pb2.RegisterRequest.SerializeToString,
-            login__register__pb2.Result.FromString,
+            login__register__pb2.RegisterResult.FromString,
             options,
             channel_credentials,
             insecure,

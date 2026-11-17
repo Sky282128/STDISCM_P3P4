@@ -3,8 +3,8 @@ syntax = "proto3";
 package auth.v1;
 
 service Authenticator {
-    rpc Authenticate (AuthRequest) returns (Result);
-    rpc Register (RegisterRequest) returns (Result);
+    rpc Authenticate (AuthRequest) returns (AuthResult);
+    rpc Register (RegisterRequest) returns (RegisterResult);
 }
 
 message AuthRequest {
@@ -18,12 +18,17 @@ message RegisterRequest {
     Role role = 3;
 }
 
-message Result {
+message AuthResult {
     bool authenticated = 1;
+    Role role = 2;
+}
+
+message RegisterResult {
+    bool success = 1;
 }
 
 enum Role {
     UNSPECIFIED = 0;
-    Student = 1;
-    Teacher = 2;
+    STUDENT = 1;
+    TEACHER = 2;
 }
