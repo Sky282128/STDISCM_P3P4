@@ -7,10 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-"proto:gen": "if not exist src\\generated mkdir src\\generated && grpc_tools_node_protoc --plugin=protoc-gen-ts_proto=.\\node_modules\\.bin\\protoc-gen-ts_proto.cmd --ts_proto_out=./src/generated --ts_proto_opt=outputServices=grpc-js,esModuleInterop=true -I=../protos ../protos/login-register.proto"
+    "proto:gen": "if not exist src\\generated mkdir src\\generated && grpc_tools_node_protoc --plugin=protoc-gen-ts_proto=.\\node_modules\\.bin\\protoc-gen-ts_proto.cmd --ts_proto_out=./src/generated --ts_proto_opt=outputServices=grpc-js,esModuleInterop=true -I=../protos ../protos/login-register.proto"
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.14.7",
+    "jose": "^6.2.17",
     "next": "16.4.6",
     "react": "19.3.0",
     "react-dom": "19.3.0"
@@ -26,5 +27,9 @@
     "tailwindcss": "4.3.3",
     "ts-proto": "^2.22.0",
     "typescript": "^5"
+  },
+  "allowScripts": {
+    "grpc-tools@1.13.1": true,
+    "protobufjs@7.6.6": true
   }
 }
