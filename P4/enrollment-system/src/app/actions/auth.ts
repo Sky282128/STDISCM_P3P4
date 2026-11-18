@@ -1,7 +1,7 @@
 'use server';
 
 import { cookies } from 'next/headers';
-import { authenticateUser, registerUser } from '@/src/libs/login-register-client';
+import { authenticateUser, logoutUser, registerUser } from '@/src/libs/login-register-client';
 import { Role } from '@/src/generated/login-register';
 
 export async function loginAction(username: string, password: string) {
@@ -45,4 +45,17 @@ export async function registerAction(
     console.error('gRPC Register failed:', error);
     return { success: false, error: 'Registration service unavailable' };
   }
+}
+
+export async function logoutAction() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('auth_token')?.value;
+  if (token) {
+    try {
+      await logoutUser({ token });
+    } catch (error) {
+      console.error('gRPC Logout failed:', error);
+    }
+  }
+  cookieStore.delete('auth_token');
 }

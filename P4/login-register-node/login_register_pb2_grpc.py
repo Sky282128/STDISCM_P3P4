@@ -5,7 +5,7 @@ import warnings
 
 import login_register_pb2 as login__register__pb2
 
-GRPC_GENERATED_VERSION = '1.85.1'
+GRPC_GENERATED_VERSION = '1.85.3'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
@@ -44,6 +44,11 @@ class AuthenticatorStub:
                 request_serializer=login__register__pb2.RegisterRequest.SerializeToString,
                 response_deserializer=login__register__pb2.RegisterResult.FromString,
                 _registered_method=True)
+        self.Logout = channel.unary_unary(
+                '/auth.v1.Authenticator/Logout',
+                request_serializer=login__register__pb2.LogoutRequest.SerializeToString,
+                response_deserializer=login__register__pb2.LogoutResult.FromString,
+                _registered_method=True)
 
 
 class AuthenticatorServicer:
@@ -61,6 +66,12 @@ class AuthenticatorServicer:
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def Logout(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_AuthenticatorServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -73,6 +84,11 @@ def add_AuthenticatorServicer_to_server(servicer, server):
                     servicer.Register,
                     request_deserializer=login__register__pb2.RegisterRequest.FromString,
                     response_serializer=login__register__pb2.RegisterResult.SerializeToString,
+            ),
+            'Logout': grpc.unary_unary_rpc_method_handler(
+                    servicer.Logout,
+                    request_deserializer=login__register__pb2.LogoutRequest.FromString,
+                    response_serializer=login__register__pb2.LogoutResult.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -129,6 +145,33 @@ class Authenticator:
             '/auth.v1.Authenticator/Register',
             login__register__pb2.RegisterRequest.SerializeToString,
             login__register__pb2.RegisterResult.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def Logout(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/auth.v1.Authenticator/Logout',
+            login__register__pb2.LogoutRequest.SerializeToString,
+            login__register__pb2.LogoutResult.FromString,
             options,
             channel_credentials,
             insecure,

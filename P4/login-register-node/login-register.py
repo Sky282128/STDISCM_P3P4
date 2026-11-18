@@ -1,5 +1,6 @@
 from concurrent import futures
 from datetime import datetime, timedelta, timezone
+import uuid
 import grpc
 import bcrypt
 import mysql.connector
@@ -15,6 +16,58 @@ config = configparser.ConfigParser()
 config.read("config.ini")
 
 class AuthenticatorServicer(login_register_pb2_grpc.AuthenticatorServicer):
+    def Logout(self, request, context):
+        connection = None
+        cursor = None
+        try:
+            payload = jwt.decode(
+                request.token,
+                config["jwt"]["secret"],
+                algorithms=["HS256"],
+            )
+            jti = payload.get("jti")
+            if not jti:
+                return login_register_pb2.LogoutResult(
+                    success=False,
+                    message="Invalid session token",
+                )
+
+            connection = mysql.connector.connect(
+                host=config["database"]["host"],
+                port=config.getint("database", "port"),
+                user=config["database"]["user"],
+                password=config["database"]["password"],
+                database=config["database"]["database"],
+            )
+            cursor = connection.cursor()
+            cursor.execute(
+                "DELETE FROM active_sessions WHERE jti = %s",
+                (jti,),
+            )
+            connection.commit()
+            return login_register_pb2.LogoutResult(
+                success=True,
+                message="Logged out",
+            )
+        except jwt.InvalidTokenError:
+            return login_register_pb2.LogoutResult(
+                success=False,
+                message="Invalid session token",
+            )
+        except Error as error:
+            print(f"Error while logging out: {error}")
+            if connection is not None and connection.is_connected():
+                connection.rollback()
+            return login_register_pb2.LogoutResult(
+                success=False,
+                message="Logout service unavailable",
+            )
+        finally:
+            if cursor is not None:
+                cursor.close()
+            if connection is not None and connection.is_connected():
+                connection.close()
+
     def Authenticate(self, request, context):
         print(f"Received login attempt for user: {request.username}")
         try:
@@ -52,6 +105,7 @@ class AuthenticatorServicer(login_register_pb2_grpc.AuthenticatorServicer):
                         "sub": str(user_id),
                         "username": request.username,
                         "role": role,
+                        "jti": str(uuid.uuid4()),
                         "iat": now,
                         "exp": now + timedelta(minutes=expires_minutes),
                     }
@@ -61,6 +115,17 @@ class AuthenticatorServicer(login_register_pb2_grpc.AuthenticatorServicer):
                         config["jwt"]["secret"],
                         algorithm="HS256"
                     )
+
+                    expires_at = payload["exp"].replace(tzinfo=None)
+                    sql = """
+                        INSERT INTO active_sessions (jti, user_id, username, expires_at)
+                        VALUES (%s, %s, %s, %s)
+                    """
+                    cursor.execute(
+                        sql,
+                        (payload["jti"], user_id, request.username, expires_at),
+                    )
+                    connection.commit()
 
                     print(f"Successful login attempt for user: {request.username}")
 

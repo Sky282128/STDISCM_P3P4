@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { loginAction } from "@/src/app/actions/auth";
-import { Role } from '@/src/generated/login-register';
 
 export default function LoginPage() {
   async function handleLogin(formData: FormData) {
@@ -12,11 +11,7 @@ export default function LoginPage() {
     const result = await loginAction(username, password);
 
     if (result.authenticated) {
-      // Optional: redirect based on the returned Role enum
-      if (result.role === Role.TEACHER) {
-        redirect('/teacher');
-      }
-      redirect('/');
+      redirect('/courses');
     }
   }
 

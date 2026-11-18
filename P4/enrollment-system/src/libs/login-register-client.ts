@@ -5,6 +5,8 @@ import {
   AuthResult,
   RegisterRequest,
   RegisterResult,
+  LogoutRequest,
+  LogoutResult,
 } from '@/src/generated/login-register'; 
 
 const GRPC_SERVER_URL = process.env.GRPC_AUTH_SERVER_URL ?? '127.0.0.1:50051';
@@ -44,6 +46,22 @@ export function registerUser(
 ): Promise<RegisterResult> {
   return new Promise((resolve, reject) => {
     authClient.register(
+      request,
+      new grpc.Metadata(),
+      { deadline: getDeadline() },
+      (err, response) => {
+        if (err || !response) {
+          return reject(err ?? new Error('Empty response from gRPC server'));
+        }
+        resolve(response);
+      }
+    );
+  });
+}
+
+export function logoutUser(request: LogoutRequest): Promise<LogoutResult> {
+  return new Promise((resolve, reject) => {
+    authClient.logout(
       request,
       new grpc.Metadata(),
       { deadline: getDeadline() },

@@ -5,6 +5,7 @@ package auth.v1;
 service Authenticator {
     rpc Authenticate (AuthRequest) returns (AuthResult);
     rpc Register (RegisterRequest) returns (RegisterResult);
+    rpc Logout (LogoutRequest) returns (LogoutResult);
 }
 
 message AuthRequest {
@@ -26,6 +27,15 @@ message AuthResult {
 }
 
 message RegisterResult {
+    bool success = 1;
+    string message = 2;
+}
+
+message LogoutRequest {
+    string token = 1;
+}
+
+message LogoutResult {
     bool success = 1;
     string message = 2;
 }

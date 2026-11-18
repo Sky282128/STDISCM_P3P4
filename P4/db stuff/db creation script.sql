@@ -32,3 +32,11 @@ CREATE TABLE IF NOT EXISTS grades (
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     PRIMARY KEY (user_id, course_id)
 );
+
+CREATE TABLE IF NOT EXISTS active_sessions (
+    jti CHAR(36) NOT NULL PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    username VARCHAR(100) NOT NULL,
+    expires_at DATETIME NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);

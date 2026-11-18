@@ -85,6 +85,15 @@ export interface RegisterResult {
   message: string;
 }
 
+export interface LogoutRequest {
+  token: string;
+}
+
+export interface LogoutResult {
+  success: boolean;
+  message: string;
+}
+
 function createBaseAuthRequest(): AuthRequest {
   return { username: "", password: "" };
 }
@@ -473,6 +482,158 @@ export const RegisterResult: MessageFns<RegisterResult> = {
   },
 };
 
+function createBaseLogoutRequest(): LogoutRequest {
+  return { token: "" };
+}
+
+export const LogoutRequest: MessageFns<LogoutRequest> = {
+  encode(message: LogoutRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.token !== "") {
+      writer.uint32(10).string(message.token);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): LogoutRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const previousRecursionDepth = (reader as any).__tsProtoDecodeDepth ?? 0;
+    if (previousRecursionDepth >= 100) {
+      throw new globalThis.Error("protobuf decode recursion limit exceeded");
+    }
+    (reader as any).__tsProtoDecodeDepth = previousRecursionDepth + 1;
+    try {
+      const end = length === undefined ? reader.len : reader.pos + length;
+      const message = createBaseLogoutRequest();
+      while (reader.pos < end) {
+        const tag = reader.uint32();
+        switch (tag >>> 3) {
+          case 1: {
+            if (tag !== 10) {
+              break;
+            }
+
+            message.token = reader.string();
+            continue;
+          }
+        }
+        if ((tag & 7) === 4 || tag === 0) {
+          break;
+        }
+        reader.skip(tag & 7);
+      }
+      return message;
+    } finally {
+      (reader as any).__tsProtoDecodeDepth = previousRecursionDepth;
+    }
+  },
+
+  fromJSON(object: any): LogoutRequest {
+    return { token: isSet(object.token) ? globalThis.String(object.token) : "" };
+  },
+
+  toJSON(message: LogoutRequest): unknown {
+    const obj: any = {};
+    if (message.token !== "") {
+      obj.token = message.token;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<LogoutRequest>, I>>(base?: I): LogoutRequest {
+    return LogoutRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<LogoutRequest>, I>>(object: I): LogoutRequest {
+    const message = createBaseLogoutRequest();
+    message.token = object.token ?? "";
+    return message;
+  },
+};
+
+function createBaseLogoutResult(): LogoutResult {
+  return { success: false, message: "" };
+}
+
+export const LogoutResult: MessageFns<LogoutResult> = {
+  encode(message: LogoutResult, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.success !== false) {
+      writer.uint32(8).bool(message.success);
+    }
+    if (message.message !== "") {
+      writer.uint32(18).string(message.message);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): LogoutResult {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const previousRecursionDepth = (reader as any).__tsProtoDecodeDepth ?? 0;
+    if (previousRecursionDepth >= 100) {
+      throw new globalThis.Error("protobuf decode recursion limit exceeded");
+    }
+    (reader as any).__tsProtoDecodeDepth = previousRecursionDepth + 1;
+    try {
+      const end = length === undefined ? reader.len : reader.pos + length;
+      const message = createBaseLogoutResult();
+      while (reader.pos < end) {
+        const tag = reader.uint32();
+        switch (tag >>> 3) {
+          case 1: {
+            if (tag !== 8) {
+              break;
+            }
+
+            message.success = reader.bool();
+            continue;
+          }
+          case 2: {
+            if (tag !== 18) {
+              break;
+            }
+
+            message.message = reader.string();
+            continue;
+          }
+        }
+        if ((tag & 7) === 4 || tag === 0) {
+          break;
+        }
+        reader.skip(tag & 7);
+      }
+      return message;
+    } finally {
+      (reader as any).__tsProtoDecodeDepth = previousRecursionDepth;
+    }
+  },
+
+  fromJSON(object: any): LogoutResult {
+    return {
+      success: isSet(object.success) ? globalThis.Boolean(object.success) : false,
+      message: isSet(object.message) ? globalThis.String(object.message) : "",
+    };
+  },
+
+  toJSON(message: LogoutResult): unknown {
+    const obj: any = {};
+    if (message.success !== false) {
+      obj.success = message.success;
+    }
+    if (message.message !== "") {
+      obj.message = message.message;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<LogoutResult>, I>>(base?: I): LogoutResult {
+    return LogoutResult.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<LogoutResult>, I>>(object: I): LogoutResult {
+    const message = createBaseLogoutResult();
+    message.success = object.success ?? false;
+    message.message = object.message ?? "";
+    return message;
+  },
+};
+
 export type AuthenticatorService = typeof AuthenticatorService;
 export const AuthenticatorService = {
   authenticate: {
@@ -493,11 +654,21 @@ export const AuthenticatorService = {
     responseSerialize: (value: RegisterResult): Buffer => Buffer.from(RegisterResult.encode(value).finish()),
     responseDeserialize: (value: Buffer): RegisterResult => RegisterResult.decode(value),
   },
+  logout: {
+    path: "/auth.v1.Authenticator/Logout" as const,
+    requestStream: false as const,
+    responseStream: false as const,
+    requestSerialize: (value: LogoutRequest): Buffer => Buffer.from(LogoutRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer): LogoutRequest => LogoutRequest.decode(value),
+    responseSerialize: (value: LogoutResult): Buffer => Buffer.from(LogoutResult.encode(value).finish()),
+    responseDeserialize: (value: Buffer): LogoutResult => LogoutResult.decode(value),
+  },
 } as const;
 
 export interface AuthenticatorServer extends UntypedServiceImplementation {
   authenticate: handleUnaryCall<AuthRequest, AuthResult>;
   register: handleUnaryCall<RegisterRequest, RegisterResult>;
+  logout: handleUnaryCall<LogoutRequest, LogoutResult>;
 }
 
 export interface AuthenticatorClient extends Client {
@@ -530,6 +701,21 @@ export interface AuthenticatorClient extends Client {
     metadata: Metadata,
     options: Partial<CallOptions>,
     callback: (error: ServiceError | null, response: RegisterResult) => void,
+  ): ClientUnaryCall;
+  logout(
+    request: LogoutRequest,
+    callback: (error: ServiceError | null, response: LogoutResult) => void,
+  ): ClientUnaryCall;
+  logout(
+    request: LogoutRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: LogoutResult) => void,
+  ): ClientUnaryCall;
+  logout(
+    request: LogoutRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: LogoutResult) => void,
   ): ClientUnaryCall;
 }
 
