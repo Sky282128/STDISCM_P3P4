@@ -2,3 +2,8 @@
 build/
 P3/producer/videos/
 .vscode/
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
