@@ -1,0 +1,30 @@
+// protos/enrollment.proto
+syntax = "proto3";
+
+package enrollment.v1;
+
+service EnrollmentService {
+    rpc Enroll (EnrollRequest) returns (EnrollResult);
+    rpc ListMyEnrollments (ListEnrollmentsRequest) returns (ListEnrollmentsResponse);
+}
+
+message EnrollRequest {
+    uint64 course_id = 1;
+}
+
+message EnrollResult {
+    bool success = 1;
+    string message = 2;
+}
+
+message ListEnrollmentsRequest {
+}
+
+message ListEnrollmentsResponse {
+    repeated EnrolledCourse enrollments = 1;
+}
+
+message EnrolledCourse {
+    uint64 course_id = 1;
+    string course_name = 2;
+}

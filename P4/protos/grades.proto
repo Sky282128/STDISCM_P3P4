@@ -1,0 +1,38 @@
+// protos/grades.proto
+syntax = "proto3";
+
+package grades.v1;
+
+service GradeService {
+    rpc GetMyGrades (GetGradesRequest) returns (GetGradesResponse);
+    rpc UploadGrades (UploadGradesRequest) returns (UploadGradesResult);
+}
+
+message GetGradesRequest {
+}
+
+message GetGradesResponse {
+    repeated GradeRecord grades = 1;
+}
+
+message GradeRecord {
+    uint64 course_id = 1;
+    string course_name = 2;
+    float grade = 3;
+}
+
+message UploadGradesRequest {
+    uint64 course_id = 1;
+    repeated GradeEntry entries = 2;
+}
+
+message GradeEntry {
+    string student_username = 1;
+    float grade = 2;
+}
+
+message UploadGradesResult {
+    bool success = 1;
+    string message = 2;
+    uint32 saved_count = 3;
+}

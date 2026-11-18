@@ -1,0 +1,28 @@
+// protos/courses.proto
+syntax = "proto3";
+
+package courses.v1;
+
+service CourseCatalog {
+    rpc ListCourses (ListCoursesRequest) returns (ListCoursesResponse);
+    rpc ListOpenCourses (ListCoursesRequest) returns (ListCoursesResponse);
+}
+
+message ListCoursesRequest {
+}
+
+message ListCoursesResponse {
+    repeated Course courses = 1;
+}
+
+message Course {
+    uint64 course_id = 1;
+    string course_name = 2;
+    CourseStatus status = 3;
+}
+
+enum CourseStatus {
+    COURSE_STATUS_UNSPECIFIED = 0;
+    OPEN = 1;
+    CLOSED = 2;
+}

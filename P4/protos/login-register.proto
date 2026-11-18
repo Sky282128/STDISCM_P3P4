@@ -21,10 +21,13 @@ message RegisterRequest {
 message AuthResult {
     bool authenticated = 1;
     Role role = 2;
+    string token = 3;
+    string message = 4;
 }
 
 message RegisterResult {
     bool success = 1;
+    string message = 2;
 }
 
 enum Role {
