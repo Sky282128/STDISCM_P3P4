@@ -33,15 +33,21 @@ class RegisterRequest(_message.Message):
     def __init__(self, username: _Optional[str] = ..., password: _Optional[str] = ..., role: _Optional[_Union[Role, str]] = ...) -> None: ...
 
 class AuthResult(_message.Message):
-    __slots__ = ("authenticated", "role")
+    __slots__ = ("authenticated", "role", "token", "message")
     AUTHENTICATED_FIELD_NUMBER: _ClassVar[int]
     ROLE_FIELD_NUMBER: _ClassVar[int]
+    TOKEN_FIELD_NUMBER: _ClassVar[int]
+    MESSAGE_FIELD_NUMBER: _ClassVar[int]
     authenticated: bool
     role: Role
-    def __init__(self, authenticated: _Optional[bool] = ..., role: _Optional[_Union[Role, str]] = ...) -> None: ...
+    token: str
+    message: str
+    def __init__(self, authenticated: _Optional[bool] = ..., role: _Optional[_Union[Role, str]] = ..., token: _Optional[str] = ..., message: _Optional[str] = ...) -> None: ...
 
 class RegisterResult(_message.Message):
-    __slots__ = ("success",)
+    __slots__ = ("success", "message")
     SUCCESS_FIELD_NUMBER: _ClassVar[int]
+    MESSAGE_FIELD_NUMBER: _ClassVar[int]
     success: bool
-    def __init__(self, success: _Optional[bool] = ...) -> None: ...
+    message: str
+    def __init__(self, success: _Optional[bool] = ..., message: _Optional[str] = ...) -> None: ...

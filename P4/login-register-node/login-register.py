@@ -1,9 +1,11 @@
 from concurrent import futures
+from datetime import datetime, timedelta, timezone
 import grpc
 import bcrypt
 import mysql.connector
 from mysql.connector import Error
 import configparser
+import jwt
 
 import login_register_pb2
 import login_register_pb2_grpc
@@ -28,24 +30,47 @@ class AuthenticatorServicer(login_register_pb2_grpc.AuthenticatorServicer):
             if connection.is_connected():
                 #joins the users table with the login to find the login detail pair
                 sql = """
-                    SELECT l.password, u.role
+                    SELECT u.user_id, l.password, u.role
                     FROM users u
                     JOIN login_details l ON u.user_id = l.user_id
                     WHERE u.username = %s
                 """
-                cursor.execute(sql, request.username)
+                cursor.execute(sql, (request.username,))
                 result = cursor.fetchone()
                 if not result:
                     return login_register_pb2.AuthResult(authenticated=False)
 
-                stored_hash, role = result
+                user_id, stored_hash, role = result
                     
                 password_bytes = request.password.encode('utf-8')
                 stored_hash_bytes = stored_hash.encode('utf-8')
 
                 if bcrypt.checkpw(password_bytes, stored_hash_bytes):
-                    return login_register_pb2.AuthResult(authenticated=True, role=role)
+                    now = datetime.now(timezone.utc)
+                    expires_minutes = config.getint("jwt", "expires_minutes", fallback=60)
+                    payload = {
+                        "sub": str(user_id),
+                        "username": request.username,
+                        "role": role,
+                        "iat": now,
+                        "exp": now + timedelta(minutes=expires_minutes),
+                    }
+
+                    token = jwt.encode(
+                        payload,
+                        config["jwt"]["secret"],
+                        algorithm="HS256"
+                    )
+
+                    print(f"Successful login attempt for user: {request.username}")
+
+                    return login_register_pb2.AuthResult(
+                        authenticated=True,
+                        role=role,
+                        token=token
+                    )
                 else:
+                    print(f"Unsuccessful login attempt for user: {request.username}")
                     return login_register_pb2.AuthResult(authenticated=False)
                 
 

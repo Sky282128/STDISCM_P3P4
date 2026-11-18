@@ -76,10 +76,13 @@ export interface RegisterRequest {
 export interface AuthResult {
   authenticated: boolean;
   role: Role;
+  token: string;
+  message: string;
 }
 
 export interface RegisterResult {
   success: boolean;
+  message: string;
 }
 
 function createBaseAuthRequest(): AuthRequest {
@@ -269,7 +272,7 @@ export const RegisterRequest: MessageFns<RegisterRequest> = {
 };
 
 function createBaseAuthResult(): AuthResult {
-  return { authenticated: false, role: 0 };
+  return { authenticated: false, role: 0, token: "", message: "" };
 }
 
 export const AuthResult: MessageFns<AuthResult> = {
@@ -279,6 +282,12 @@ export const AuthResult: MessageFns<AuthResult> = {
     }
     if (message.role !== 0) {
       writer.uint32(16).int32(message.role);
+    }
+    if (message.token !== "") {
+      writer.uint32(26).string(message.token);
+    }
+    if (message.message !== "") {
+      writer.uint32(34).string(message.message);
     }
     return writer;
   },
@@ -312,6 +321,22 @@ export const AuthResult: MessageFns<AuthResult> = {
             message.role = reader.int32() as any;
             continue;
           }
+          case 3: {
+            if (tag !== 26) {
+              break;
+            }
+
+            message.token = reader.string();
+            continue;
+          }
+          case 4: {
+            if (tag !== 34) {
+              break;
+            }
+
+            message.message = reader.string();
+            continue;
+          }
         }
         if ((tag & 7) === 4 || tag === 0) {
           break;
@@ -328,6 +353,8 @@ export const AuthResult: MessageFns<AuthResult> = {
     return {
       authenticated: isSet(object.authenticated) ? globalThis.Boolean(object.authenticated) : false,
       role: isSet(object.role) ? roleFromJSON(object.role) : 0,
+      token: isSet(object.token) ? globalThis.String(object.token) : "",
+      message: isSet(object.message) ? globalThis.String(object.message) : "",
     };
   },
 
@@ -339,6 +366,12 @@ export const AuthResult: MessageFns<AuthResult> = {
     if (message.role !== 0) {
       obj.role = roleToJSON(message.role);
     }
+    if (message.token !== "") {
+      obj.token = message.token;
+    }
+    if (message.message !== "") {
+      obj.message = message.message;
+    }
     return obj;
   },
 
@@ -349,18 +382,23 @@ export const AuthResult: MessageFns<AuthResult> = {
     const message = createBaseAuthResult();
     message.authenticated = object.authenticated ?? false;
     message.role = object.role ?? 0;
+    message.token = object.token ?? "";
+    message.message = object.message ?? "";
     return message;
   },
 };
 
 function createBaseRegisterResult(): RegisterResult {
-  return { success: false };
+  return { success: false, message: "" };
 }
 
 export const RegisterResult: MessageFns<RegisterResult> = {
   encode(message: RegisterResult, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.success !== false) {
       writer.uint32(8).bool(message.success);
+    }
+    if (message.message !== "") {
+      writer.uint32(18).string(message.message);
     }
     return writer;
   },
@@ -386,6 +424,14 @@ export const RegisterResult: MessageFns<RegisterResult> = {
             message.success = reader.bool();
             continue;
           }
+          case 2: {
+            if (tag !== 18) {
+              break;
+            }
+
+            message.message = reader.string();
+            continue;
+          }
         }
         if ((tag & 7) === 4 || tag === 0) {
           break;
@@ -399,13 +445,19 @@ export const RegisterResult: MessageFns<RegisterResult> = {
   },
 
   fromJSON(object: any): RegisterResult {
-    return { success: isSet(object.success) ? globalThis.Boolean(object.success) : false };
+    return {
+      success: isSet(object.success) ? globalThis.Boolean(object.success) : false,
+      message: isSet(object.message) ? globalThis.String(object.message) : "",
+    };
   },
 
   toJSON(message: RegisterResult): unknown {
     const obj: any = {};
     if (message.success !== false) {
       obj.success = message.success;
+    }
+    if (message.message !== "") {
+      obj.message = message.message;
     }
     return obj;
   },
@@ -416,6 +468,7 @@ export const RegisterResult: MessageFns<RegisterResult> = {
   fromPartial<I extends Exact<DeepPartial<RegisterResult>, I>>(object: I): RegisterResult {
     const message = createBaseRegisterResult();
     message.success = object.success ?? false;
+    message.message = object.message ?? "";
     return message;
   },
 };

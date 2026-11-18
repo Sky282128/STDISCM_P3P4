@@ -1,14 +1,27 @@
 'use server';
 
+import { cookies } from 'next/headers';
 import { authenticateUser, registerUser } from '@/src/libs/login-register-client';
 import { Role } from '@/src/generated/login-register';
 
 export async function loginAction(username: string, password: string) {
   try {
     const result = await authenticateUser({ username, password });
+
+    if (result.authenticated && result.token) {
+      const cookieStore = await cookies();
+      cookieStore.set('auth_token', result.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 60 * 60, // 1 hour (match expires_minutes in config.ini)
+      });
+    }
+
     return {
       authenticated: result.authenticated,
-      role: result.role, // Numeric Role enum (Role.STUDENT = 1, Role.TEACHER = 2)
+      role: result.role,
     };
   } catch (error) {
     console.error('gRPC Authenticate failed:', error);

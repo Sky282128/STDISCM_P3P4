@@ -24,23 +24,23 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14login-register.proto\x12\x07\x61uth.v1\"1\n\x0b\x41uthRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"R\n\x0fRegisterRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\x12\x1b\n\x04role\x18\x03 \x01(\x0e\x32\r.auth.v1.Role\"@\n\nAuthResult\x12\x15\n\rauthenticated\x18\x01 \x01(\x08\x12\x1b\n\x04role\x18\x02 \x01(\x0e\x32\r.auth.v1.Role\"!\n\x0eRegisterResult\x12\x0f\n\x07success\x18\x01 \x01(\x08*1\n\x04Role\x12\x0f\n\x0bUNSPECIFIED\x10\x00\x12\x0b\n\x07STUDENT\x10\x01\x12\x0b\n\x07TEACHER\x10\x02\x32\x89\x01\n\rAuthenticator\x12\x39\n\x0c\x41uthenticate\x12\x14.auth.v1.AuthRequest\x1a\x13.auth.v1.AuthResult\x12=\n\x08Register\x12\x18.auth.v1.RegisterRequest\x1a\x17.auth.v1.RegisterResultb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14login-register.proto\x12\x07\x61uth.v1\"1\n\x0b\x41uthRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"R\n\x0fRegisterRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\x12\x1b\n\x04role\x18\x03 \x01(\x0e\x32\r.auth.v1.Role\"`\n\nAuthResult\x12\x15\n\rauthenticated\x18\x01 \x01(\x08\x12\x1b\n\x04role\x18\x02 \x01(\x0e\x32\r.auth.v1.Role\x12\r\n\x05token\x18\x03 \x01(\t\x12\x0f\n\x07message\x18\x04 \x01(\t\"2\n\x0eRegisterResult\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t*1\n\x04Role\x12\x0f\n\x0bUNSPECIFIED\x10\x00\x12\x0b\n\x07STUDENT\x10\x01\x12\x0b\n\x07TEACHER\x10\x02\x32\x89\x01\n\rAuthenticator\x12\x39\n\x0c\x41uthenticate\x12\x14.auth.v1.AuthRequest\x1a\x13.auth.v1.AuthResult\x12=\n\x08Register\x12\x18.auth.v1.RegisterRequest\x1a\x17.auth.v1.RegisterResultb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'login_register_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_ROLE']._serialized_start=269
-  _globals['_ROLE']._serialized_end=318
+  _globals['_ROLE']._serialized_start=318
+  _globals['_ROLE']._serialized_end=367
   _globals['_AUTHREQUEST']._serialized_start=33
   _globals['_AUTHREQUEST']._serialized_end=82
   _globals['_REGISTERREQUEST']._serialized_start=84
   _globals['_REGISTERREQUEST']._serialized_end=166
   _globals['_AUTHRESULT']._serialized_start=168
-  _globals['_AUTHRESULT']._serialized_end=232
-  _globals['_REGISTERRESULT']._serialized_start=234
-  _globals['_REGISTERRESULT']._serialized_end=267
-  _globals['_AUTHENTICATOR']._serialized_start=321
-  _globals['_AUTHENTICATOR']._serialized_end=458
+  _globals['_AUTHRESULT']._serialized_end=264
+  _globals['_REGISTERRESULT']._serialized_start=266
+  _globals['_REGISTERRESULT']._serialized_end=316
+  _globals['_AUTHENTICATOR']._serialized_start=370
+  _globals['_AUTHENTICATOR']._serialized_end=507
 # @@protoc_insertion_point(module_scope)
