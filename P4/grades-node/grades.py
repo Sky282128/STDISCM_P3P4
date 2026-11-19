@@ -108,7 +108,7 @@ class GradeServiceImpl(grades_pb2_grpc.GradeServiceServicer):
 
 
 def server_port():
-    return os.environ.get("SERVER_PORT") or _config.get("server", "port", fallback="50054")
+    return os.environ.get("SERVER_PORT") or _config.get("server", "port", fallback="50053")
 
 
 def monitor_database(health_servicer):

@@ -158,7 +158,7 @@ class EnrollmentServiceImpl(enrollment_pb2_grpc.EnrollmentServiceServicer):
 
 
 def server_port():
-    return os.environ.get("SERVER_PORT") or _config.get("server", "port", fallback="50053")
+    return os.environ.get("SERVER_PORT") or _config.get("server", "port", fallback="50054")
 
 
 def monitor_database(health_servicer):
