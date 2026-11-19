@@ -46,6 +46,7 @@ export default async function CoursesPage() {
               {course.status === CourseStatus.OPEN
                 ? 'OPEN'
                 : courseStatusToJSON(course.status)}
+              {<Link href=''></Link>}
             </li>
           ))}
         </ul>
@@ -53,7 +54,7 @@ export default async function CoursesPage() {
         <p>No open courses are available.</p>
       )}
 
-      <Link href="/">Home</Link>
+      <Link href="/dashboard">Home</Link>
       <br />
       <form action={handleLogout}>
         <button type="submit">Logout</button>
