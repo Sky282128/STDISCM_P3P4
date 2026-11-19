@@ -56,7 +56,11 @@ class CourseCatalogService(courses_pb2_grpc.CourseCatalogServicer):
                 (jti, int(user_id)),
             )
             session_exists = cursor.fetchone() is not None
-        except Exception:
+        except Exception as error:
+            print(
+                f"Session verification error: {type(error).__name__}: {error}",
+                flush=True,
+            )
             context.abort(grpc.StatusCode.INTERNAL, "Could not verify session")
         finally:
             if cursor is not None:
