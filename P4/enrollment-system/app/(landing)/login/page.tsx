@@ -11,7 +11,7 @@ export default function LoginPage() {
     const result = await loginAction(username, password);
 
     if (result.authenticated) {
-      redirect('/courses');
+      redirect('/dashboard');
     }
   }
 
