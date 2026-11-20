@@ -1,23 +1,39 @@
+
 import { getSession } from "@/src/libs/session";
 import { redirect } from "next/navigation";
-import { Role } from '@/src/generated/login-register';
-import  { StudentDashboard, TeacherDashboard }  from '@/src/components/dashboard/dashboard'
+import { Role } from "@/src/generated/login-register";
+import {
+  StudentDashboard,
+  TeacherDashboard,
+} from "@/src/components/dashboard/dashboard";
+import { Suspense } from "react";
 
-export default async function DashboardPage() {
-    const session = await getSession();
+async function DashboardContent() {
+  const session = await getSession();
 
-    if (!session) {
-        redirect('/login');
-    }
-    const isTeacher = session.role === Role.TEACHER
+  if (!session) {
+    redirect("/login");
+  }
 
-    if (isTeacher) {
-        return(
-            <TeacherDashboard />
-        );
-    } else {
-        return (
-            <StudentDashboard />
-        );
-    }
+  if (session.role === Role.TEACHER) {
+    return <TeacherDashboard />;
+  }
+
+  return <StudentDashboard />;
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-green-50 flex items-center justify-center">
+          <p className="text-green-800 font-semibold">
+            Loading dashboard...
+          </p>
+        </div>
+      }
+    >
+      <DashboardContent />
+    </Suspense>
+  );
 }

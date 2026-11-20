@@ -1,3 +1,4 @@
+import "server-only";
 import * as grpc from '@grpc/grpc-js';
 import {
   CourseCatalogClient,

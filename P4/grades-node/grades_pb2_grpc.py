@@ -5,7 +5,7 @@ import warnings
 
 import grades_pb2 as grades__pb2
 
-GRPC_GENERATED_VERSION = '1.85.1'
+GRPC_GENERATED_VERSION = '1.85.3'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
@@ -44,6 +44,11 @@ class GradeServiceStub:
                 request_serializer=grades__pb2.UploadGradesRequest.SerializeToString,
                 response_deserializer=grades__pb2.UploadGradesResult.FromString,
                 _registered_method=True)
+        self.GetEnrolledStudents = channel.unary_unary(
+                '/grades.v1.GradeService/GetEnrolledStudents',
+                request_serializer=grades__pb2.GetEnrolledStudentsRequest.SerializeToString,
+                response_deserializer=grades__pb2.GetEnrolledStudentsResponse.FromString,
+                _registered_method=True)
 
 
 class GradeServiceServicer:
@@ -61,6 +66,12 @@ class GradeServiceServicer:
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def GetEnrolledStudents(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_GradeServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -73,6 +84,11 @@ def add_GradeServiceServicer_to_server(servicer, server):
                     servicer.UploadGrades,
                     request_deserializer=grades__pb2.UploadGradesRequest.FromString,
                     response_serializer=grades__pb2.UploadGradesResult.SerializeToString,
+            ),
+            'GetEnrolledStudents': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetEnrolledStudents,
+                    request_deserializer=grades__pb2.GetEnrolledStudentsRequest.FromString,
+                    response_serializer=grades__pb2.GetEnrolledStudentsResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -129,6 +145,33 @@ class GradeService:
             '/grades.v1.GradeService/UploadGrades',
             grades__pb2.UploadGradesRequest.SerializeToString,
             grades__pb2.UploadGradesResult.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetEnrolledStudents(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/grades.v1.GradeService/GetEnrolledStudents',
+            grades__pb2.GetEnrolledStudentsRequest.SerializeToString,
+            grades__pb2.GetEnrolledStudentsResponse.FromString,
             options,
             channel_credentials,
             insecure,

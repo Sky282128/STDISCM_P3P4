@@ -1,4 +1,4 @@
-// protos/grades.proto
+
 syntax = "proto3";
 
 package grades.v1;
@@ -6,6 +6,7 @@ package grades.v1;
 service GradeService {
     rpc GetMyGrades (GetGradesRequest) returns (GetGradesResponse);
     rpc UploadGrades (UploadGradesRequest) returns (UploadGradesResult);
+    rpc GetEnrolledStudents (GetEnrolledStudentsRequest) returns (GetEnrolledStudentsResponse);
 }
 
 message GetGradesRequest {
@@ -35,4 +36,17 @@ message UploadGradesResult {
     bool success = 1;
     string message = 2;
     uint32 saved_count = 3;
+}
+
+// Retrieves students enrolled in a selected course.
+message GetEnrolledStudentsRequest {
+    uint64 course_id = 1;
+}
+
+message GetEnrolledStudentsResponse {
+    repeated EnrolledStudent students = 1;
+}
+
+message EnrolledStudent {
+    string username = 1;
 }

@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0cgrades.proto\x12\tgrades.v1\"\x12\n\x10GetGradesRequest\";\n\x11GetGradesResponse\x12&\n\x06grades\x18\x01 \x03(\x0b\x32\x16.grades.v1.GradeRecord\"D\n\x0bGradeRecord\x12\x11\n\tcourse_id\x18\x01 \x01(\x04\x12\x13\n\x0b\x63ourse_name\x18\x02 \x01(\t\x12\r\n\x05grade\x18\x03 \x01(\x02\"P\n\x13UploadGradesRequest\x12\x11\n\tcourse_id\x18\x01 \x01(\x04\x12&\n\x07\x65ntries\x18\x02 \x03(\x0b\x32\x15.grades.v1.GradeEntry\"5\n\nGradeEntry\x12\x18\n\x10student_username\x18\x01 \x01(\t\x12\r\n\x05grade\x18\x02 \x01(\x02\"K\n\x12UploadGradesResult\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\x13\n\x0bsaved_count\x18\x03 \x01(\r2\xa7\x01\n\x0cGradeService\x12H\n\x0bGetMyGrades\x12\x1b.grades.v1.GetGradesRequest\x1a\x1c.grades.v1.GetGradesResponse\x12M\n\x0cUploadGrades\x12\x1e.grades.v1.UploadGradesRequest\x1a\x1d.grades.v1.UploadGradesResultb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0cgrades.proto\x12\tgrades.v1\"\x12\n\x10GetGradesRequest\";\n\x11GetGradesResponse\x12&\n\x06grades\x18\x01 \x03(\x0b\x32\x16.grades.v1.GradeRecord\"D\n\x0bGradeRecord\x12\x11\n\tcourse_id\x18\x01 \x01(\x04\x12\x13\n\x0b\x63ourse_name\x18\x02 \x01(\t\x12\r\n\x05grade\x18\x03 \x01(\x02\"P\n\x13UploadGradesRequest\x12\x11\n\tcourse_id\x18\x01 \x01(\x04\x12&\n\x07\x65ntries\x18\x02 \x03(\x0b\x32\x15.grades.v1.GradeEntry\"5\n\nGradeEntry\x12\x18\n\x10student_username\x18\x01 \x01(\t\x12\r\n\x05grade\x18\x02 \x01(\x02\"K\n\x12UploadGradesResult\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\x13\n\x0bsaved_count\x18\x03 \x01(\r\"/\n\x1aGetEnrolledStudentsRequest\x12\x11\n\tcourse_id\x18\x01 \x01(\x04\"K\n\x1bGetEnrolledStudentsResponse\x12,\n\x08students\x18\x01 \x03(\x0b\x32\x1a.grades.v1.EnrolledStudent\"#\n\x0f\x45nrolledStudent\x12\x10\n\x08username\x18\x01 \x01(\t2\x8d\x02\n\x0cGradeService\x12H\n\x0bGetMyGrades\x12\x1b.grades.v1.GetGradesRequest\x1a\x1c.grades.v1.GetGradesResponse\x12M\n\x0cUploadGrades\x12\x1e.grades.v1.UploadGradesRequest\x1a\x1d.grades.v1.UploadGradesResult\x12\x64\n\x13GetEnrolledStudents\x12%.grades.v1.GetEnrolledStudentsRequest\x1a&.grades.v1.GetEnrolledStudentsResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -43,6 +43,12 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_GRADEENTRY']._serialized_end=313
   _globals['_UPLOADGRADESRESULT']._serialized_start=315
   _globals['_UPLOADGRADESRESULT']._serialized_end=390
-  _globals['_GRADESERVICE']._serialized_start=393
-  _globals['_GRADESERVICE']._serialized_end=560
+  _globals['_GETENROLLEDSTUDENTSREQUEST']._serialized_start=392
+  _globals['_GETENROLLEDSTUDENTSREQUEST']._serialized_end=439
+  _globals['_GETENROLLEDSTUDENTSRESPONSE']._serialized_start=441
+  _globals['_GETENROLLEDSTUDENTSRESPONSE']._serialized_end=516
+  _globals['_ENROLLEDSTUDENT']._serialized_start=518
+  _globals['_ENROLLEDSTUDENT']._serialized_end=553
+  _globals['_GRADESERVICE']._serialized_start=556
+  _globals['_GRADESERVICE']._serialized_end=825
 # @@protoc_insertion_point(module_scope)

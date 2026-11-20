@@ -1,48 +1,135 @@
-import * as grpc from '@grpc/grpc-js';
+
+import "server-only";
+
+import { credentials, Metadata } from "@grpc/grpc-js";
+import { cookies } from "next/headers";
+
 import {
   GradeServiceClient,
-  GetGradesRequest,
-  GetGradesResponse
-} from '@/src/generated/grades';
-import { cookies } from 'next/headers';
+  type GradeRecord,
+  type UploadGradesRequest,
+  type UploadGradesResult,
+  type GetEnrolledStudentsRequest,
+  type EnrolledStudent,
+} from "@/src/generated/grades";
 
-const GRPC_SERVER_URL =
-  process.env.GRPC_GRADES_SERVER_URL ?? '127.0.0.1:50054';
+const GRADES_SERVER_URL =
+  process.env.GRPC_GRADES_SERVER_URL ?? "127.0.0.1:50054";
 
-const globalForGrpc = globalThis as unknown as {
+// Reuse the gRPC client during development.
+const globalForGrpc = globalThis as typeof globalThis & {
   gradesGrpcClient?: GradeServiceClient;
 };
 
-export const gradesClient =
+const gradesClient =
   globalForGrpc.gradesGrpcClient ??
-  new GradeServiceClient(GRPC_SERVER_URL, grpc.credentials.createInsecure());
+  new GradeServiceClient(
+    GRADES_SERVER_URL,
+    credentials.createInsecure()
+  );
 
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== "production") {
   globalForGrpc.gradesGrpcClient = gradesClient;
 }
 
-export async function getGrades(openOnly = false): Promise<GetGradesResponse> {
+// --------------------------------------------------
+// Get Student Grades
+// --------------------------------------------------
+
+export async function getMyGrades(): Promise<GradeRecord[]> {
   const cookieStore = await cookies();
-  const token = cookieStore.get('auth_token')?.value;
+  const token = cookieStore.get("auth_token")?.value;
+
   if (!token) {
-    throw new Error('Not authenticated');
+    throw new Error("You are not authenticated.");
   }
 
-  const metadata = new grpc.Metadata();
-  metadata.set('authorization', `Bearer ${token}`);
+  const metadata = new Metadata();
+  metadata.set("authorization", `Bearer ${token}`);
 
   return new Promise((resolve, reject) => {
-    const method = gradesClient.getMyGrades.bind(gradesClient);
-
-    method(
-      GetGradesRequest.create(),
+    gradesClient.getMyGrades(
+      {},
       metadata,
-      { deadline: new Date(Date.now() + 5000) },
       (error, response) => {
-        if (error || !response) {
-          reject(error ?? new Error('Empty response from gRPC courses server'));
+        if (error) {
+          console.error("GetMyGrades gRPC error:", error);
+          reject(error);
           return;
         }
+
+        resolve(response.grades ?? []);
+      }
+    );
+  });
+}
+
+// --------------------------------------------------
+// Get Enrolled Students (Teacher Only)
+// --------------------------------------------------
+
+export async function getEnrolledStudents(
+  courseId: number
+): Promise<EnrolledStudent[]> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("auth_token")?.value;
+
+  if (!token) {
+    throw new Error("You are not authenticated.");
+  }
+
+  const metadata = new Metadata();
+  metadata.set("authorization", `Bearer ${token}`);
+
+  const request: GetEnrolledStudentsRequest = {
+    courseId,
+  };
+
+  return new Promise((resolve, reject) => {
+    gradesClient.getEnrolledStudents(
+      request,
+      metadata,
+      (error, response) => {
+        if (error) {
+          console.error("GetEnrolledStudents gRPC error:", error);
+          reject(error);
+          return;
+        }
+
+        resolve(response.students ?? []);
+      }
+    );
+  });
+}
+
+// --------------------------------------------------
+// Upload Grades (Teacher Only)
+// --------------------------------------------------
+
+export async function uploadGrades(
+  request: UploadGradesRequest
+): Promise<UploadGradesResult> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("auth_token")?.value;
+
+  if (!token) {
+    throw new Error("You are not authenticated.");
+  }
+
+  const metadata = new Metadata();
+  metadata.set("authorization", `Bearer ${token}`);
+
+  return new Promise((resolve, reject) => {
+    gradesClient.uploadGrades(
+      request,
+      metadata,
+      (error, response) => {
+        if (error) {
+          console.error("UploadGrades gRPC error:", error);
+          reject(error);
+          return;
+        }
+
         resolve(response);
       }
     );
