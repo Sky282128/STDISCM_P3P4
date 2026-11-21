@@ -1,0 +1,95 @@
+# Reusable defaults for all 5 Python gRPC services
+x-grpc-service: &grpc-base
+  restart: unless-stopped
+  environment:
+    DB_HOST: mysql
+    DB_PORT: "3306"
+    DB_NAME: ${MYSQL_DATABASE}
+    DB_USER: ${MYSQL_USER}
+    DB_PASSWORD: ${MYSQL_PASSWORD}
+    GRPC_PORT: "50051"
+  depends_on:
+    mysql:
+      condition: service_healthy
+  networks:
+    - backend-net
+
+services:
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - "./db stuff:/docker-entrypoint-initdb.d:ro"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - backend-net
+
+  courses-service:
+    <<: *grpc-base
+    build:
+      context: ./courses-node
+      dockerfile: /Dockerfile
+    volumes:
+      - ./courses-node/config.docker.ini:/app/config.ini:ro
+
+  enrollment-service:
+    <<: *grpc-base
+    build:
+      context: ./enrollment-node
+      dockerfile: /Dockerfile
+    volumes:
+      - ./enrollment-node/config.docker.ini:/app/config.ini:ro
+
+  grades-service:
+    <<: *grpc-base
+    build:
+      context: ./grades-node
+      dockerfile: /Dockerfile
+    volumes:
+      - ./grades-node/config.docker.ini:/app/config.ini:ro
+
+  login-register-service:
+    <<: *grpc-base
+    build:
+      context: ./login-register-node
+      dockerfile: /Dockerfile
+    volumes:
+      - ./login-register-node/config.docker.ini:/app/config.ini:ro
+
+  frontend:
+    build:
+      context: ./enrollment-system
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      GRPC_AUTH_SERVER_URL: login-register-service:50051
+      GRPC_COURSES_SERVER_URL: courses-service:50052
+      GRPC_ENROLLMENT_SERVER_URL: enrollment-service:50053
+      GRPC_GRADES_SERVER_URL: grades-service:50054
+      JWT_SECRET: 9bba8688a9ed0ea7ade09e8e7f5ba43829938d2edefa830a20f8719332cc37a7
+    depends_on:
+      - grades-service
+      - courses-service
+      - enrollment-service
+      - login-register-service
+    networks:
+      - backend-net
+
+volumes:
+  mysql_data:
+
+networks:
+  backend-net:
+    driver: bridge
