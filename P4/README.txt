@@ -1,7 +1,7 @@
-Aldrin Hsu
-Raine Margaux Siongco
-Gabriel Alexander Villaflor
-Gabriel Villas
+Aldrin Hsu (S03)
+Raine Margaux Siongco (S03)
+Gabriel Alexander Villaflor (S04)
+Gabriel Villas (S04)
 STDISCM Section S03 & S04
 P4: Distributed Fault Tolerance
 ------------------------------------------------------------------
